@@ -63,7 +63,7 @@ app.post("/inventory", (req, res) => {
 
   connection.query(postQuery, err => {
     if (err) throw err;
-    res.status(200).redirect("http://localhost:3000/admin");
+    res.status(200).redirect("https://royalrentals.netlify.com/admin");
   });
 });
 
@@ -81,7 +81,7 @@ app.post("/form_submission", (req, res) => {
   
     connection.query(postQuery, (err, rows) => {
       if (err) throw err;
-      res.status(200).redirect("http://localhost:3000/contact");
+      res.status(200).redirect("https://royalrentals.netlify.com/contact");
     });
   });
 
