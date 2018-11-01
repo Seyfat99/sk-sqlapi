@@ -7,7 +7,8 @@ const app = express();
 app.use(bodyParser.json());
 app.use(cors());
 app.use(
-  bodyParser.urlencoded({       //For contact form info
+  bodyParser.urlencoded({
+    //For contact form info
     extended: true
   })
 );
@@ -34,18 +35,18 @@ app.get("/inventory", (req, res) => {
 
 app.get("/inventory/:id", (req, res) => {
   const id = Number(req.params.id);
-  connection.query(`SELECT * FROM Cars WHERE carId = ${id}`, (err, rows) => {
+  connection.query(`SELECT * FROM Cars WHERE carId = ?`, [id], (err, rows) => {
     if (err) throw err;
     res.send(rows);
   });
 });
 
 app.get("/form_submission", (req, res) => {
-    connection.query("SELECT * FROM  UserContact", (err, rows) => {
-      if (err) throw err;
-      res.send(rows);
-    });
+  connection.query("SELECT * FROM  UserContact", (err, rows) => {
+    if (err) throw err;
+    res.send(rows);
   });
+});
 // POST NEW CAR
 app.post("/inventory", (req, res) => {
   const {
@@ -58,32 +59,28 @@ app.post("/inventory", (req, res) => {
     image
   } = req.body;
 
-  const postQuery = `INSERT INTO Cars (name, description, price,rentPrice, engine, category, image)
-        VALUES ("${name}","${description}","${price}","${rentPrice}","${engine}","${category}","${image}")`;
+  const postQuery =
+    "INSERT INTO Cars (name, description, price,rentPrice, engine, category, image) VALUES (?,?,?,?,?,?,?)";
+  const values = [name, description, price, rentPrice, engine, category, image];
 
-  connection.query(postQuery, err => {
+  connection.query(postQuery, values, err => {
     if (err) throw err;
     res.status(200).redirect("https://royalrentals.netlify.com/admin");
   });
 });
 
 app.post("/form_submission", (req, res) => {
-    const {
-      firstName,
-      lastName,
-      email,
-      phone,
-      comments,
-    } = req.body;
-  
-    const postQuery = `INSERT INTO UserContact (firstName, lastName, email, phone, comments)
-    VALUES ("${firstName}","${lastName}","${email}","${phone}","${comments}")`;
-  
-    connection.query(postQuery, (err, rows) => {
-      if (err) throw err;
-      res.status(200).redirect("https://royalrentals.netlify.com/contact");
-    });
+  const { firstName, lastName, email, phone, comments } = req.body;
+
+  const postQuery =
+    "INSERT INTO UserContact (firstName, lastName, email, phone, comments) VALUES (?,?,?,?,?)";
+  const values = [firstName, lastName, email, phone, comments];
+
+  connection.query(postQuery, values, (err, rows) => {
+    if (err) throw err;
+    res.status(200).redirect("https://royalrentals.netlify.com/contact");
   });
+});
 
 app.delete("/inventory/:id", (req, res) => {
   const id = req.params.id;
@@ -104,17 +101,25 @@ app.put("/inventory/:id", (req, res) => {
     category,
     image
   } = req.body;
-  const insertQuery = `UPDATE Cars SET name = "${name}", description = "${description}", price = "${price}",
-      rentPrice = "${rentPrice}", engine = "${engine}", category = "${category}", image = "${image}"
-      WHERE carId = ${id}`;
-
-  connection.query(insertQuery, err => {
+  const insertQuery =
+    "UPDATE Cars SET name = ?, description = ?, price = ?, rentPrice = ?, engine = ?, category = ?, image = ? WHERE carId = ?";
+  const values = [
+    name,
+    description,
+    price,
+    rentPrice,
+    engine,
+    category,
+    image,
+    id
+  ];
+  connection.query(insertQuery, values, err => {
     if (err) throw err;
     res.status(200).send(`Row With Id of ${id} Was Updated`);
- });
+  });
 });
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
-    console.log(`Our app is running on port ${ PORT }`);
+  console.log(`Our app is running on port ${PORT}`);
 });
